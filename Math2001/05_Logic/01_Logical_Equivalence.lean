@@ -43,7 +43,22 @@ example (P Q R : Prop) : (P ∧ (Q ∨ R)) ↔ ((P ∧ Q) ∨ (P ∧ R)) := by
       constructor
       · apply h1
       · apply h2
-  · sorry
+  · intro h
+    constructor
+    · obtain hl | hr := h
+      · obtain ⟨hla, hlb⟩ := hl
+        exact hla
+      · obtain ⟨hra, hrb⟩ := hr
+        apply hra
+    · obtain hl | hr := h
+      · obtain ⟨hla, hlb⟩ := hl
+        left
+        exact hlb
+      · obtain ⟨hra, hrb⟩ := hr
+        right
+        exact hrb
+
+
 
 #truth_table P ∧ (Q ∨ R)
 #truth_table (P ∧ Q) ∨ (P ∧ R)
@@ -81,43 +96,113 @@ example (P : α → Prop) : ¬ (∃ x, P x) ↔ ∀ x, ¬ P x := by
 
 
 example {P Q : Prop} (h : P ∧ Q) : P ∨ Q := by
-  sorry
+  obtain ⟨ha, hb⟩ := h
+  · left
+    exact ha
 
 example {P Q R : Prop} (h1 : P → Q) (h2 : P → R) (h3 : P) : Q ∧ R := by
-  sorry
+  constructor
+  · apply h1 h3
+  · apply h2 h3
+
 
 example (P : Prop) : ¬(P ∧ ¬ P) := by
-  sorry
+  intro H
+  obtain ⟨ha, hb⟩ := H
+  contradiction
 
 example {P Q : Prop} (h1 : P ↔ ¬ Q) (h2 : Q) : ¬ P := by
-  sorry
+  obtain ⟨h1, h1'⟩ := h1
+  · by_cases h2' : P
+    · apply h1 at h2'
+      contradiction
+    · apply h2'
+
 
 example {P Q : Prop} (h1 : P ∨ Q) (h2 : Q → P) : P := by
-  sorry
+  obtain ha | hb := h1
+  · exact ha
+  · apply h2 hb
 
 example {P Q R : Prop} (h : P ↔ Q) : (P ∧ R) ↔ (Q ∧ R) := by
   sorry
 
 example (P : Prop) : (P ∧ P) ↔ P := by
-  sorry
+  constructor
+  intro H
+  obtain ⟨ha, hb⟩ := H
+  · exact ha
+  intro h
+  constructor
+  · exact h
+  · exact h
 
 example (P Q : Prop) : (P ∨ Q) ↔ (Q ∨ P) := by
-  sorry
+  constructor
+  · intro h
+    obtain h | h := h
+    · right
+      apply h
+    · left
+      apply h
+  · intro h
+    obtain h | h := h
+    · right
+      apply h
+    · left
+      apply h
 
 example (P Q : Prop) : ¬(P ∨ Q) ↔ (¬P ∧ ¬Q) := by
-  sorry
+  constructor
+  · intro H
+    push_neg at H
+    exact H
+  · intro H
+    push_neg
+    exact H
 
 example {P Q : α → Prop} (h1 : ∀ x, P x → Q x) (h2 : ∀ x, P x) : ∀ x, Q x := by
-  sorry
+  intro x
+  · apply h1
+    apply h2
+
 
 example {P Q : α → Prop} (h : ∀ x, P x ↔ Q x) : (∃ x, P x) ↔ (∃ x, Q x) := by
-  sorry
+  constructor
+  · intro h'
+    obtain ⟨x, hx⟩ := h'
+    use x
+    obtain ⟨hz, hz'⟩ : P x ↔ Q x := by apply h
+    apply hz
+    exact hx
+  · intro h'
+    obtain ⟨x, hx⟩ := h'
+    use x
+    obtain ⟨hz, hz'⟩ : P x ↔ Q x := by apply h
+    apply hz'
+    exact hx
+
 
 example (P : α → β → Prop) : (∃ x y, P x y) ↔ ∃ y x, P x y := by
-  sorry
+  constructor
+  · intro h
+    obtain ⟨hx, hx',  hy⟩ := h
+    use hx'
+    use hx
+    apply hy
+  · intro h
+    obtain ⟨hx, hx',  hy⟩ := h
+    use hx'
+    use hx
+    apply hy
+
 
 example (P : α → β → Prop) : (∀ x y, P x y) ↔ ∀ y x, P x y := by
-  sorry
+  constructor
+  · intro h y x
+    apply h
+  · intro h y x
+    apply h
 
 example (P : α → Prop) (Q : Prop) : ((∃ x, P x) ∧ Q) ↔ ∃ x, (P x ∧ Q) := by
   sorry

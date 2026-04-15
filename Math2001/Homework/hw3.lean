@@ -14,15 +14,32 @@ for clearer statements and any special instructions. -/
 
 @[autograded 2]
 theorem problem1 {a b : ℚ} (h : a = 3 - b) : a + b = 3 ∨ a + b = 4 := by
-  sorry
+  have h' : a + b = 3 := by addarith[h]
+  left
+  exact h'
 
 @[autograded 5]
 theorem problem2 {t : ℚ} (h : t ^ 2 + t - 6 = 0) : t = 2 ∨ t = -3 := by
-  sorry
+  have h' :=
+  calc
+    (t + 3) * (t - 2) = t ^ 2 + t - 6 := by ring
+    _ = 0 := by rw[h]
+  obtain h2 | h2 := eq_zero_or_eq_zero_of_mul_eq_zero h'
+  · have : t = -3 := by addarith[h2]
+    right
+    exact this
+
+  · have : t = 2 := by addarith[h2]
+    left
+    exact this
 
 @[autograded 3]
 theorem problem3 : ∃ a b : ℕ, a ≠ 0 ∧ 2 ^ a = 5 * b + 1 := by
-  sorry
+  use 4, 3
+  constructor
+  · numbers
+  · numbers
+
 
 @[autograded 5]
 theorem problem4 (x : ℚ) : ∃ y : ℚ, y ^ 2 > x := by

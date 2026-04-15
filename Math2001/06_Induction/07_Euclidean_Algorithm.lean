@@ -69,29 +69,61 @@ theorem gcd_dvd (a b : ℤ) : gcd a b ∣ b ∧ gcd a b ∣ a := by
     obtain ⟨IH_right, IH_left⟩ := IH
     constructor
     · -- prove that `gcd a b ∣ b`
-      sorry
+      apply IH_left
     · -- prove that `gcd a b ∣ a`
-      sorry
+      have h2 := fmod_add_fdiv a b
+      obtain ⟨l, hl⟩ := IH_left
+      obtain ⟨r, hr⟩ := IH_right
+
+      use (r + l * fdiv a b)
+      calc
+        a = fmod a b + b * fdiv a b := by rw[h2]
+        _ = gcd b (fmod a b) * r + gcd b (fmod a b) * l * fdiv a b := by rw[← hr, ← hl]
+        _ = gcd b (fmod a b) * (r + l * fdiv a b) := by ring
+
   · -- case `b < 0`
     have IH : _ ∧ _ := gcd_dvd b (fmod a (-b)) -- inductive hypothesis
     obtain ⟨IH_right, IH_left⟩ := IH
     constructor
     · -- prove that `gcd a b ∣ b`
-      sorry
+      apply IH_left
     · -- prove that `gcd a b ∣ a`
-      sorry
+      have h3 := fmod_add_fdiv a (-b)
+      set r := fmod a (-b)
+      set q := fdiv a (-b)
+
+      obtain ⟨R, hr⟩ := IH_right
+      obtain ⟨L, hl⟩ := IH_left
+
+      use (R + -L * q)
+      calc
+        a = r + -b * q := by rw[h3]
+        _ = gcd b r * R  + -(gcd b r * L) * q := by rw[← hr, ← hl]
+        _ = gcd b r * (R + -L * q) := by ring
+        
   · -- case `b = 0`, `0 ≤ a`
     constructor
     · -- prove that `gcd a b ∣ b`
-      sorry
+      have hb : b = 0 := by apply le_antisymm h1 h2
+      use 0
+
+      calc b = 0 := by rw[hb]
+        _ = a * 0 := by ring
+
     · -- prove that `gcd a b ∣ a`
-      sorry
+      use 1
+      ring
   · -- case `b = 0`, `a < 0`
     constructor
     · -- prove that `gcd a b ∣ b`
-      sorry
+      have hb : b = 0 := by apply le_antisymm h1 h2
+      use 0
+
+      calc b = 0 := by rw[hb]
+        _ = -a * 0 := by ring
     · -- prove that `gcd a b ∣ a`
-      sorry
+      use -1
+      ring
 termination_by gcd_dvd a b => b
 
 

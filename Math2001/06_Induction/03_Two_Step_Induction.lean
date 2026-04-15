@@ -141,7 +141,24 @@ def b : ℕ → ℤ
   | n + 2 => 5 * b (n + 1) - 6 * b n
 
 example (n : ℕ) : b n = 3 ^ n - 2 ^ n := by
-  sorry
+  two_step_induction n with k IH1 IH2
+
+  -- Base Case #1
+  · rw[b]
+    numbers
+
+  -- Base Case #2
+  · rw[b]
+    numbers
+
+  ·-- Inductive Case
+    calc b (k + 1 + 1) = 5 * b (k + 1) - 6 * b k := by rw[b]
+      _ = 5 * (3 ^ (k + 1) - 2 ^ (k + 1)) - 6 * (3 ^ k - 2 ^ k) := by rw[IH1, IH2]
+      _ = 5 * 3 ^ (k + 1) - 5 * 2 ^ (k + 1) - 6 * 3 ^ k + 6 * 2 ^ k := by ring
+      _ = 5 * 3 ^ (k + 1) - 5 * 2 ^ (k + 1) - 2 * 3 ^ (k + 1) + 3 * 2 ^ (k + 1) := by ring
+      _ =  3 ^ (k + 2) -  2 ^ (k + 2) := by ring
+
+
 
 def c : ℕ → ℤ
   | 0 => 3
@@ -149,7 +166,20 @@ def c : ℕ → ℤ
   | n + 2 => 4 * c n
 
 example (n : ℕ) : c n = 2 * 2 ^ n + (-2) ^ n := by
-  sorry
+  two_step_induction n with k IH1 IH2
+
+  · -- Base Case #1
+    rw[c]
+    numbers
+  · -- Base Case #2
+    rw[c]
+    numbers
+
+  · -- Inductive Case
+    calc c (k + 1 + 1) = 4 * c k := by rw[c]
+      _ = 4 * (2 * 2 ^ k + (-2) ^ k) := by rw[IH1]
+      _ = 8 * 2 ^ k + 4 * (-2) ^ k := by ring
+      _ = 2 * 2 ^ (k + 1 + 1) + (-2) ^ (k + 1 + 1) := by ring
 
 def t : ℕ → ℤ
   | 0 => 5
@@ -157,7 +187,20 @@ def t : ℕ → ℤ
   | n + 2 => 2 * t (n + 1) - t n
 
 example (n : ℕ) : t n = 2 * n + 5 := by
-  sorry
+  two_step_induction n with k IH1 IH2
+
+  · -- Base Case #1
+    rw[t]
+    numbers
+  · -- Base Case #2
+    rw[t]
+    numbers
+
+  · -- Inductive Case
+    calc t (k + 1 + 1) = 2 * t (k + 1) - t k := by rw[t]
+      _ = 2 * (2 * (k + 1) + 5) - (2 * k + 5) := by rw[IH1, IH2]
+      _ = 4 * (k + 1) + 10 - 2 * k - 5  := by ring
+      _ = 2 * (k + 1 + 1) + 5 := by ring
 
 def q : ℕ → ℤ
   | 0 => 1
@@ -165,7 +208,24 @@ def q : ℕ → ℤ
   | n + 2 => 2 * q (n + 1) - q n + 6 * n + 6
 
 example (n : ℕ) : q n = (n:ℤ) ^ 3 + 1 := by
-  sorry
+  two_step_induction n with k IH1 IH2
+
+  · -- Base Case #1
+    rw[q]
+    numbers
+  · -- Base Case #2
+    rw [q]
+    numbers
+
+  · -- Inductive Case
+    calc q (k + 1 + 1) = 2 * q (k + 1) - q k + 6 * k + 6 := by rw[q]
+      _ = 2 * ((k + 1) ^ 3 + 1) - (k ^ 3 + 1) + 6 * k + 6 := by rw[IH1, IH2]
+      _ = 2 * (k + 1) ^ 3 + 2 - k ^ 3 - 1 + 6 * k + 6 := by ring
+      _ = 2 * (k + 1) ^ 3 + 7 - k ^ 3 + 6 * k  := by ring
+      _ = 2 * (k ^ 3 + 3 * k ^ 2 + 3 * k + 1) + 7 - k ^ 3 + 6 * k := by ring
+      _ = 2 * k ^ 3 + 6 * k ^ 2 + 6 * k + 2 + 7 - k ^ 3 + 6 * k := by ring
+      _ = k ^ 3 + 6 * k ^ 2 + 12 * k + 9 := by ring
+      _ = (k + 1 + 1) ^ 3 + 1 := by ring
 
 def s : ℕ → ℤ
   | 0 => 2
@@ -173,7 +233,21 @@ def s : ℕ → ℤ
   | n + 2 => 2 * s (n + 1) + 3 * s n
 
 example (m : ℕ) : s m ≡ 2 [ZMOD 5] ∨ s m ≡ 3 [ZMOD 5] := by
-  sorry
+  two_step_induction m with k IH1 IH2
+
+  · -- Base Case #1
+    rw[s]
+    left
+    numbers
+  · -- Base Case #2
+    rw[s]
+    right
+    numbers
+
+  · -- Inductive Case
+    sorry
+
+
 
 def p : ℕ → ℤ
   | 0 => 2
@@ -188,8 +262,37 @@ def r : ℕ → ℤ
   | 1 => 0
   | n + 2 => 2 * r (n + 1) + r n
 
+#eval r 0 ≥ 2 ^ 0
+#eval r 1 ≥ 2 ^ 1
+#eval r 2 ≥ 2 ^ 2
+#eval r 3 ≥ 2 ^ 3
+#eval r 4 ≥ 2 ^ 4
+#eval r 5 ≥ 2 ^ 5
+
+
+#eval r 7 ≥ 2 ^ 7
+
+
 example : forall_sufficiently_large n : ℕ, r n ≥ 2 ^ n := by
-  sorry
+  dsimp
+  use 7
+  intro x hx
+  two_step_induction_from_starting_point x, hx with k hk IH1 IH2
+
+  · -- Base Case #1
+    dsimp[r]
+    numbers
+
+  · -- Base Case #2
+    dsimp[r]
+    numbers
+
+  · -- Inductive Case
+    calc r (k + 1 + 1) = 2 * r (k + 1) + r k := by rw[r]
+      _ ≥ 2 * 2 ^ (k + 1) + 2 ^ k := by rel[IH1, IH2]
+      _ ≥ 2 * 2 ^ (k + 1) := by extra
+      _ = 2 ^ (k + 1 + 1) := by ring
+
 
 example : forall_sufficiently_large n : ℕ,
     (0.4:ℚ) * 1.6 ^ n < F n ∧ F n < (0.5:ℚ) * 1.7 ^ n := by

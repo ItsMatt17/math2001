@@ -107,7 +107,17 @@ example (a b : ℤ) (h : 0 < b) : ∃ r : ℤ, 0 ≤ r ∧ r < b ∧ a ≡ r [ZM
 
 
 theorem lt_fmod_of_neg (n : ℤ) {d : ℤ} (hd : d < 0) : d < fmod n d := by
-  sorry
+  rw[fmod]
+  split_ifs with h1 h2 h3 <;> push_neg at *
+  · -- `n * d < 0`
+    sorry
+  · -- `n * d ≥ 0`
+    sorry
+  · apply hd
+  · sorry
+
+termination_by _ n d => 2 * n - d
+
 
 def T (n : ℤ) : ℤ :=
   if 0 < n then
@@ -119,7 +129,29 @@ def T (n : ℤ) : ℤ :=
 termination_by T n => 3 * n - 1
 
 theorem T_eq (n : ℤ) : T n = n ^ 2 := by
-  sorry
+  rw[T]
+  split_ifs with h1 h2 <;> push_neg at *
+  · -- `n > 0`
+    have IH := T_eq (1 - n)
+    calc
+      T (1 - n) + 2 * n - 1 = (1 - n) ^ 2 + 2 * n - 1 := by rw[IH]
+      _ = n ^ 2 := by ring
+
+  · -- `-n > 0`
+    have IH := T_eq (-n)
+    calc
+      T (-n) = (-n) ^ 2 := by rw[IH]
+      _ = n ^ 2 := by ring
+
+  · -- `n = 0`
+    have h2' : n ≥ 0 := by addarith[h2]
+    have h3 : n = 0 := by apply le_antisymm h1 h2'
+    calc
+      0 = 0 ^ 2 := by ring
+      _ = n ^ 2 := by rw[h3]
+
+
+termination_by _ n => 3 * n - 1
 
 theorem uniqueness (a b : ℤ) (h : 0 < b) {r s : ℤ}
     (hr : 0 ≤ r ∧ r < b ∧ a ≡ r [ZMOD b])

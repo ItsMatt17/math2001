@@ -79,11 +79,32 @@ example {P : Prop} (hP : ¬¬P) : P := by
 
 def Tribalanced (x : ℝ) : Prop := ∀ n : ℕ, (1 + x / n) ^ n < 3
 
+
 example : ∃ x : ℝ, Tribalanced x ∧ ¬ Tribalanced (x + 1) := by
   sorry
 
+
 example (P Q : Prop) : (¬P → ¬Q) ↔ (Q → P) := by
-  sorry
+  constructor
+  · intro h h'
+    by_cases hz : P
+    · apply hz
+    · apply h at hz
+      contradiction
+  · intro h h'
+    by_cases hz : Q
+    · apply h at hz
+      contradiction
+    ·apply hz
+
 
 example : ∃ k : ℕ, Superpowered k ∧ ¬ Superpowered (k + 1) := by
-  sorry
+  by_cases H : Superpowered 2
+  · use 2
+    constructor
+    · apply H
+    · apply not_superpowered_three
+  · use 1
+    constructor
+    · apply superpowered_one
+    · apply H

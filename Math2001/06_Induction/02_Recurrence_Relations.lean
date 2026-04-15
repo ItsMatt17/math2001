@@ -40,13 +40,21 @@ def x : ℕ → ℤ
   | 0 => 5
   | n + 1 => 2 * x n - 1
 
+#eval x 0
+#eval x 1
+#eval x 2
 
 example (n : ℕ) : x n ≡ 1 [ZMOD 4] := by
   simple_induction n with k IH
   · -- base case
-    sorry
+    calc x 0 = 5 := by rw[x]
+      _ ≡ 1 + 4 * 1 [ZMOD 4] := by numbers
+      _ ≡ 1 [ZMOD 4] := by extra
+
   · -- inductive step
-    sorry
+    calc x (k + 1) = 2 * x k - 1 := by rw[x]
+      _ ≡ 2 * 1 - 1 [ZMOD 4] := by rel[IH]
+      _ ≡ 1 [ZMOD 4] := by numbers
 
 example (n : ℕ) : x n = 2 ^ (n + 2) + 1 := by
   simple_induction n with k IH
@@ -109,37 +117,119 @@ def c : ℕ → ℤ
   | n + 1 => 3 * c n - 10
 
 example (n : ℕ) : Odd (c n) := by
-  sorry
+  simple_induction n with k IH
+  · -- Base Case
+    use 3
+    rw[c]
+    numbers
+  · -- Inductive Case
+    obtain ⟨x, hx⟩ := IH
+    use 3 * x - 4
+    calc
+      c (k + 1) = 3 * c k - 10 := by rw[c]
+      _ = 3 * (2 * x + 1) - 10 := by rw[hx]
+      _ = 2 * (3 * x - 4) + 1 := by ring
+
 
 example (n : ℕ) : c n = 2 * 3 ^ n + 5 := by
-  sorry
+  simple_induction n with k IH
+  · -- Base Case
+    rw[c]
+    numbers
+  · -- Inductive Case
+    calc c (k + 1) = 3 * c k - 10 := by rw[c]
+      _ = 3 * (2 * 3 ^ k + 5) - 10 := by rw[IH]
+      _ = 2 * 3 ^ (k + 1) + 5 := by ring
 
 def y : ℕ → ℕ
   | 0 => 2
   | n + 1 => (y n) ^ 2
 
 example (n : ℕ) : y n = 2 ^ (2 ^ n) := by
-  sorry
+  simple_induction n with k IH
+  · -- Base Case
+    rw [y]
+    numbers
+  · -- Inductive Case
+    calc y (k + 1) = (y k) ^ 2 := by rw[y]
+      _ = (2 ^ 2 ^ k) ^ 2 := by rw[IH]
+      _ = (2 ^ 2 ^ (k + 1)) := by ring
 
 def B : ℕ → ℚ
   | 0 => 0
   | n + 1 => B n + (n + 1 : ℚ) ^ 2
 
 example (n : ℕ) : B n = n * (n + 1) * (2 * n + 1) / 6 := by
-  sorry
+  simple_induction n with k IH
+  · -- Base Case
+    rw[B]
+    numbers
+  · -- Inductive Step
+    calc B (k + 1) = B k + (k + 1) ^ 2 := by rw[B]
+      _ = k * (k + 1) * (2 * k + 1) / 6 + (k + 1) ^ 2 := by rw[IH]
+      _ = k * (k + 1) * (2 * k + 1) / 6 + 6 * (k + 1) ^ 2 / 6 := by ring
+      _ = (k + 1) * (k + 1 + 1) * (2 * (k + 1) + 1) / 6 := by ring
+      -- Come back to understand factoring just assumed and used ring
 
 def S : ℕ → ℚ
   | 0 => 1
   | n + 1 => S n + 1 / 2 ^ (n + 1)
 
 example (n : ℕ) : S n = 2 - 1 / 2 ^ n := by
-  sorry
+  simple_induction n with k IH
+  · -- Base Case
+    rw[S]
+    numbers
+  · -- Inductive Case
+    calc S (k + 1) = S (k) + 1 / 2 ^ (k + 1) := by rw[S]
+      _ = (2 - 1 / 2 ^ k) + (1 / 2 ^ (k + 1)) := by rw[IH]
+      _ = 2 - (2 / 2 ^ (k + 1)) + (1 / (2 ^ (k + 1))) := by ring
+      _ = 2 - (2 / 2 ^ (k + 1)) + (1 / (2 ^ (k + 1))) := by ring
+      _ = 2 - (1 / (2 ^ (k + 1))) := by ring
+
+
 
 example (n : ℕ) : 0 < n ! := by
-  sorry
+  simple_induction n with k IH
+  · -- Base Case
+    rw[factorial]
+    numbers
+  · -- Inductive Step
+
+    calc
+      (k + 1)! = (k + 1) * k ! := by rw[factorial]
+      _ = k * k ! + k ! := by ring
+      _ ≥ k ! := by extra
+      _ > 0 := by rel[IH]
 
 example {n : ℕ} (hn : 2 ≤ n) : Nat.Even (n !) := by
-  sorry
+    induction_from_starting_point n, hn with k IH hk
+    · -- Base Case
+      use 1
+      dsimp[factorial]
+
+    · -- Inductive Step
+      obtain ⟨p, hp⟩ := hk
+      use p * k + p
+      calc
+        (k + 1)! = (k + 1) * k ! := by rw[factorial]
+        _ = (k + 1) * (2 * p) := by rw[hp]
+        _ = 2 * p * k + 2 * p := by ring
+        _ = 2 * (p * k + p) := by ring
+
+
+#eval (0 + 1) ! ≤ (0 + 1) ^ 0
+#eval (1 + 1) ! ≤ (1 + 1) ^ 1
+#eval (2 + 1) ! ≤ (2 + 1) ^ 2
+#eval (3 + 1) ! ≤ (3 + 1) ^ 3
+#eval (4 + 1) ! ≤ (4 + 1) ^ 4
+#eval (5 + 1) ! ≤ (5 + 1) ^ 5
+
 
 example (n : ℕ) : (n + 1) ! ≤ (n + 1) ^ n := by
-  sorry
+  simple_induction n with k IH
+  · -- Base Case
+    dsimp[factorial]
+    numbers
+  · -- Inductive Case
+    sorry
