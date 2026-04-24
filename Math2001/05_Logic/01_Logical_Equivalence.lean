@@ -125,7 +125,7 @@ example {P Q : Prop} (h1 : P ∨ Q) (h2 : Q → P) : P := by
   · apply h2 hb
 
 example {P Q R : Prop} (h : P ↔ Q) : (P ∧ R) ↔ (Q ∧ R) := by
-  sorry
+
 
 example (P : Prop) : (P ∧ P) ↔ P := by
   constructor
