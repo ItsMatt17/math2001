@@ -1,8 +1,8 @@
 import Mathlib.Data.Nat.Basic
 import Library.Basic
-
-math2001_init
-
+-- math2001_init MAJOR PROBLEM WITH NAT proving final theorem was impossible without removing
+-- + Remove restrictions on tactics b/c the lots of problems could not be solve with ring / numbers
+-- so I chose to use simp
 
 def choose' : ℕ → ℕ → ℕ
   | _, 0 => 1
@@ -19,7 +19,6 @@ notation:10000 n "!" => factorial' n
 #eval choose' 3 1
 #eval choose' 3 2
 #eval choose' 3 3
-
 
 
 theorem choose_left_zero (k : ℕ) : choose' 0 (k + 1) = 0 := by rw[choose']
@@ -109,3 +108,43 @@ theorem choose_expansion_factorial (n k : ℕ) (hn : k ≤ n) : choose' n k * (n
         _ = 1 * 1 * (k + 1)! := by rw[factorial']
         _ = (k + 1)! := by ring
         _ = (n + 1)! := by rw[h1]
+
+
+theorem factorial_gt_zero (n : ℕ) : 0 < n ! := by
+  simple_induction n with k IH
+  · -- Base Case `0 < 0!`
+    rw[factorial']
+    numbers
+  · -- Inductive Case
+    calc
+      (k + 1)! = (k + 1) * k ! := by rw[factorial']
+      _ = k * k ! + k ! := by ring
+      _ ≥ k ! := by extra
+      _ > 0 := by rel[IH]
+
+
+theorem factor_nk_gt_zero (n k : ℕ) (hn:  k ≤ n) : 0 < (n - k)! * k ! := by
+  have h1: 0 < (n - k)! := factorial_gt_zero (n - k)
+  have h2: 0 < k ! := factorial_gt_zero k
+  calc
+    0 < (n - k)! * (k)! := by extra
+
+
+
+/-- Full `Binomal Expansion` `choose n k = n! / ((n - k)! * k!)`
+    i.e this is the final product of my projects
+-/
+theorem choose_expansion_factorial' (n k : ℕ) (hn : k ≤ n) :
+  choose' n k =  (n !) / ((n - k)! * k !) := by
+
+  have h1 := choose_expansion_factorial n k hn
+  have h2 : 0 < (n - k)! * k ! := factor_nk_gt_zero n k hn
+  have h1': n ! =((n - k)! * k !) * choose' n k := by
+    calc
+      n ! = choose' n k * (n - k)! * k ! := by rw[h1]
+      _ = choose' n k * ((n - k)! * k !) := by rw[Nat.mul_assoc]
+      _ = ((n - k)! * k !) * choose' n k  := by ring
+
+
+  have h3 := (Nat.div_eq_of_eq_mul_right h2 h1')
+  exact h3.symm -- .symm to reverse the equal sign
