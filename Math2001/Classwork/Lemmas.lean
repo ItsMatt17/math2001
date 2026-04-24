@@ -14,7 +14,7 @@ section
 variable (a b : ℤ)
 
 -- Chapter #2
-#check ne_of_lt
+#check ne_of_lt 
 #check ne_of_gt
 #check le_antisymm
 #check le_or_succ_le a 1

@@ -100,7 +100,7 @@ theorem gcd_dvd (a b : ℤ) : gcd a b ∣ b ∧ gcd a b ∣ a := by
         a = r + -b * q := by rw[h3]
         _ = gcd b r * R  + -(gcd b r * L) * q := by rw[← hr, ← hl]
         _ = gcd b r * (R + -L * q) := by ring
-        
+
   · -- case `b = 0`, `0 ≤ a`
     constructor
     · -- prove that `gcd a b ∣ b`
@@ -253,4 +253,12 @@ theorem bezout (a b : ℤ) : ∃ x y : ℤ, x * a + y * b = gcd a b := by
 
 
 theorem gcd_maximal {d a b : ℤ} (ha : d ∣ a) (hb : d ∣ b) : d ∣ gcd a b := by
-  sorry
+  obtain ⟨k, ha⟩ := ha
+  obtain ⟨r, hb⟩ := hb
+
+  have h1 := L_mul_add_R_mul a b
+  use (L a b * k + R a b * r)
+  calc
+    gcd a b = L a b * a + R a b * b := by rw[h1]
+    _ =  L a b * (d * k) + R a b * (d * r) := by rw[ha, hb]
+    _ = d * (L a b * k + R a b * r) := by ring

@@ -232,4 +232,10 @@ example (n : ℕ) : (n + 1) ! ≤ (n + 1) ^ n := by
     dsimp[factorial]
     numbers
   · -- Inductive Case
-    sorry
+
+    have H : k + 1 ≤ k + 1 + 1 := by extra
+    calc
+      (k + 1 + 1)! = (k + 1 + 1) * (k + 1)! := by rw[factorial]
+      _ ≤ (k + 1 + 1) * (k + 1) ^ k := by rel[IH]
+      _ ≤ (k + 1 + 1) * (k + 1 + 1) ^ k := by rel[H]
+      _ = (k + 1 + 1) ^ (k + 1) := by ring

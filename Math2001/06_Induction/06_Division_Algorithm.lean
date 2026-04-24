@@ -105,18 +105,31 @@ example (a b : ℤ) (h : 0 < b) : ∃ r : ℤ, 0 ≤ r ∧ r < b ∧ a ≡ r [ZM
 
 /-! # Exercises -/
 
-
 theorem lt_fmod_of_neg (n : ℤ) {d : ℤ} (hd : d < 0) : d < fmod n d := by
   rw[fmod]
   split_ifs with h1 h2 h3 <;> push_neg at *
-  · -- `n * d < 0`
+  · -- Case `n * d > 0`
+    have IH := lt_fmod_of_neg (n + d) hd
+    apply IH
+  · -- Case `0 ≤ n * d `, `0 < d * (n - d)`
+    have IH := lt_fmod_of_neg (n - d) hd
+    apply IH
+  · --
+    apply hd
+  · --
     sorry
-  · -- `n * d ≥ 0`
-    sorry
-  · apply hd
-  · sorry
 
-termination_by _ n d => 2 * n - d
+    have ht : d * (n - d) = d * n - (d * d) := by ring
+    rw[ht] at h2
+
+
+    have hz : -d > 0 := by addarith[hd]
+    have H : -d * d ≤ -d * n := by addarith[h2]
+    cancel -d at H
+
+    apply lt_of_le_of_ne' H h3
+
+termination_by _ n d hd => -(2 * n - d)
 
 
 def T (n : ℤ) : ℤ :=

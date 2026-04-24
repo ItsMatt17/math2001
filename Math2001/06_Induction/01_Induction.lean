@@ -224,7 +224,28 @@ example : forall_sufficiently_large n : ℕ, 2 ^ n ≥ n ^ 3 := by
 
 
 theorem Odd.pow {a : ℕ} (ha : Odd a) (n : ℕ) : Odd (a ^ n) := by
-  sorry
+  simple_induction n with k IH
+  · -- Base Case `Odd a ^ 0`
+    use 0
+    ring
+  · -- Inductive Case
+    obtain ⟨p, hp⟩ := IH
+    obtain ⟨r, hr⟩ := ha
+    use (2 * p * r + r + p)
+    calc
+      a ^ (k + 1) = a * a ^ k := by ring
+      _ = (2 * r + 1) * (2 * p + 1) := by rw[hp, hr]
+      _ = 4 * p * r + 2 * r + 2 * p + 1 := by ring
+      _ = 2 * (2 * p * r + r + p) + 1 := by ring
+
 
 theorem Nat.even_of_pow_even {a n : ℕ} (ha : Even (a ^ n)) : Even a := by
-  sorry
+  obtain h1 | h1 := Nat.even_or_odd a
+  · -- Case `Even a`
+    apply h1
+  · -- Case `Odd a` (there's gotta be a better way to do this????
+    -- super easy to prove but the lemma is impossible to find / we aren't taught it in textbook
+
+    have hb := Odd.pow h1 n
+    rw [Nat.odd_iff_not_even] at hb
+    contradiction

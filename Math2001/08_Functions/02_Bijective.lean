@@ -127,8 +127,18 @@ example : ∀ f : Celestial → Celestial, Injective f → Bijective f := by
       apply h_sun
     · use moon
       apply h_moon
-  | moon, sun => sorry
-  | moon, moon => sorry
+  | moon, sun =>
+    intro y
+    cases y
+    · use moon
+      apply h_moon
+    · use sun
+      apply h_sun
+  | moon, moon =>
+    have : sun = moon
+    · apply hf
+      rw[h_sun, h_moon]
+    contradiction
 
 
 example : ¬ ∀ f : ℕ → ℕ, Injective f → Bijective f := by
@@ -154,7 +164,18 @@ example : ¬ ∀ f : ℕ → ℕ, Injective f → Bijective f := by
 
 
 example : Bijective (fun (x : ℝ) ↦ 4 - 3 * x) := by
-  sorry
+  dsimp[Bijective]
+  constructor
+  · dsimp[Injective]
+    intro x y h
+    calc
+      x = ((4 - 3 * x) - 4) / -3 := by ring
+      _ = ((4 - 3 * y) - 4) / -3 := by rw[h]
+      _ = y := by ring
+  · dsimp[Surjective]
+    intro b
+    use (b - 4) / -3
+    ring
 
 example : ¬ Bijective (fun (x : ℝ) ↦ 4 - 3 * x) := by
   sorry
@@ -164,7 +185,14 @@ example : Bijective (fun (x : ℝ) ↦ x ^ 2 + 2 * x) := by
   sorry
 
 example : ¬ Bijective (fun (x : ℝ) ↦ x ^ 2 + 2 * x) := by
-  sorry
+  dsimp[Bijective]
+  push_neg
+  left
+  dsimp[Injective]
+  push_neg
+  use 0, -2
+  constructor <;> numbers
+
 
 inductive Element
   | fire
@@ -182,14 +210,43 @@ def e : Element → Element
   | air => water
 
 example : Bijective e := by
-  sorry
+  dsimp[Bijective]
+  constructor
+  · dsimp[Injective]
+    intro a1 a2 h
+    cases a1 <;> cases a2 <;> exhaust
+
+  · dsimp[Surjective]
+    intro b
+    cases b
+    · use earth
+      rw[e]
+    · use air
+      rw[e]
+    · use fire
+      rw[e]
+    · use water
+      rw[e]
+
 
 example : ¬ Bijective e := by
   sorry
 
 
+-- prot prot prot,
+
+
+
 example : ∀ f : Subatomic → Subatomic, Injective f → Bijective f := by
-  sorry
+  intro f hf
+  dsimp[Bijective]
+  constructor
+  · apply hf
+
+  · dsimp[Surjective]
+    intro b
+    sorry
+    -- simply wayyyy too many cases to solve without an alternate method of proving
 
 
 example : ∀ f : Element → Element, Injective f → Bijective f := by

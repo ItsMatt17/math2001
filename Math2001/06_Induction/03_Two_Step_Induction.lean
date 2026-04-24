@@ -7,7 +7,6 @@ math2001_init
 
 open Int
 
-
 def a : ℕ → ℤ
   | 0 => 2
   | 1 => 1
@@ -245,7 +244,8 @@ example (m : ℕ) : s m ≡ 2 [ZMOD 5] ∨ s m ≡ 3 [ZMOD 5] := by
     numbers
 
   · -- Inductive Case
-    sorry
+    obtain IH1 | IH1 := IH1
+
 
 
 
