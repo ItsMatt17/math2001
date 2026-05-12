@@ -1,8 +1,7 @@
 import Mathlib.Data.Nat.Basic
 import Library.Basic
 -- math2001_init MAJOR PROBLEM WITH NAT proving final theorem was impossible without removing
--- + Remove restrictions on tactics b/c the lots of problems could not be solve with ring / numbers
--- so I chose to use simp
+
 
 
 /-- The recursive definition of `n choose k` -/
@@ -24,6 +23,7 @@ notation:10000 n "!" => factorial' n
 
 
 theorem choose_left_zero (k : ℕ) : choose' 0 (k + 1) = 0 := by rw[choose']
+theorem choose_right_zero (n : ℕ) : choose' n 0 = 1 := by rw[choose']
 
 theorem choose_eq_zero_of_gt (n k : ℕ) (hn : n < k) : choose' n k = 0 := by
   match n, k with
@@ -45,7 +45,7 @@ theorem choose_eq_zero_of_gt (n k : ℕ) (hn : n < k) : choose' n k = 0 := by
 theorem choose_same (n k : ℕ) (hn : n = k) : choose' n k = 1 := by
   match n, k with
   | n, 0 => rw[hn, choose']
-  | 0, k + 1 => rw[← hn, choose']
+  | 0, k + 1 => contradiction
   | n + 1, k + 1 =>
     have hk: n = k := by addarith[hn]
     have IH1 := choose_same n k hk
@@ -54,73 +54,61 @@ theorem choose_same (n k : ℕ) (hn : n = k) : choose' n k = 1 := by
 
 /--
   An intermediary theorem to prove the binomal expansion to `choose n k = n! / ((n - k)! * k!)`
-
-  -/
-theorem choose_expansion_factorial (n k : ℕ) (hn : k ≤ n) : choose' n k * (n - k)! * k ! = n ! := by
+-/
+theorem choose_expansion_factorial {n k : ℕ} (hn : k ≤ n) : choose' n k * (n - k)! * k ! = n ! := by
   match n, k with
-  | 0, k =>
-    have hk := Nat.eq_zero_of_le_zero hn
-    rw[hk, choose', Nat.sub_zero, factorial']
-  | n + 1, 0 => rw[choose', Nat.sub_zero, factorial', Nat.mul_one, Nat.one_mul]
+  | n, 0 =>
+    rw[choose_right_zero, Nat.sub_zero, factorial', Nat.mul_one, Nat.one_mul]
+  | 0, k + 1 =>
+    rw[Nat.le_zero] at hn
+    contradiction
   | n + 1, k + 1 =>
-    obtain h1 | h1  := Nat.lt_or_eq_of_le hn
-    · -- `k + 1 < n + 1`
-      have h2 : k ≤ n := by addarith[h1]
-      have h2': k < n := by addarith[h1]
+    obtain ha | hb := Nat.lt_or_eq_of_le hn
+    · -- Case #1 `k + 1 < n + 1`
+      have h1 : k ≤ n := by addarith[hn]
+      have h2 : k < n := by addarith[ha]
+      have h3 : k + 1 ≤ n := Nat.succ_le_of_lt h2
 
-      have h3 : k + 1 ≤ n := Nat.succ_le_of_lt h2'
+      have IH1 := choose_expansion_factorial h1
+      have IH2 := choose_expansion_factorial h3
+      
+      have IH1' : choose' n k * (n + 1 - (k + 1))! * (k + 1)! = n ! * (k + 1) := by
+        rw[Nat.add_sub_add_right, factorial', Nat.mul_comm (k + 1) (k !), ← Nat.mul_assoc, IH1]
 
-      have IH1 := choose_expansion_factorial n k h2
-      have IH2 := choose_expansion_factorial n (k + 1) h3
+      have hp : (n + 1 - (k + 1)) = ((n - (k + 1)) + 1) := Nat.succ_sub h3
+      have IH2' : choose' n (k + 1) * (n + 1 - (k + 1))! * (k + 1)! = n ! * (n - k) := by
+        rw[hp, factorial']
+        calc
+          choose' n (k + 1) * ((n - (k + 1) + 1) * (n - (k + 1))!) * (k + 1)! = choose' n (k + 1) * (n - (k + 1))! * (k + 1)! * (n - (k + 1) + 1) := by ring
+          _ = n ! * (n - k) := by rw[IH2, ← hp, Nat.add_sub_add_right]
 
-      have h4 : n + 1 - (k + 1) = (n - (k + 1)) + 1 := Nat.succ_sub h3
-      have h5 : (k + 1) + (n - k) = (1 + n) := by
+      have hk : (k + 1) + (n - k) = (n + 1) := by
         calc
         (k + 1) + (n - k) =  (1 + k) + (n - k) := by ring
         _ = (1 + (k + (n - k))) := by ring
-        _ = (1 + n) := by rw[Nat.add_sub_cancel' h2]
+        _ = (1 + n) := by rw[Nat.add_sub_cancel' h1]
+        _ = (n + 1) := by ring
 
 
-      calc
-        (choose' n k + choose' n (k + 1)) * (n + 1 - (k + 1))! * (k + 1)! = choose' n k  * (n + 1 - (k + 1))! * (k + 1)! + choose' n (k + 1) * (n + 1 - (k + 1))! * (k + 1)! := by ring
-        _ = choose' n k * (n - k)! * (k + 1)! + choose' n (k + 1) * (n + 1 - (k + 1))! * (k + 1)! := by simp
-        _ = choose' n k * (n - k)! * ((k + 1) * k !) + choose' n (k + 1) * (n + 1 - (k + 1))! * (k + 1)! := by rw[factorial']
-        _ = choose' n k * (n - k)! * k ! * (k + 1)  + choose' n (k + 1) * (n + 1 - (k + 1))! * (k + 1)! := by ring
-        _ = n ! * (k + 1) + choose' n (k + 1) * (n + 1 - (k + 1))! * (k + 1)! := by rw[IH1]
-        _ = n ! * (k + 1) + choose' n (k + 1) * ((n - (k + 1)) + 1)! * (k + 1)! := by rw[h4]
-        _ = n ! * (k + 1) + choose' n (k + 1) * (((n - (k + 1)) + 1) * (((n - (k + 1))))!) * (k + 1)! := by rw[factorial']
-        _ = n ! * (k + 1) + choose' n (k + 1) * (((n - (k + 1))))! * (k + 1)! * ((n - (k + 1)) + 1) := by ring
-        _ = n ! * (k + 1) + n ! * (n - (k + 1) + 1) := by rw[IH2]
-        _ = n ! * ((k + 1) + (n - (k + 1) + 1)) := by ring
-        _ = n ! * ((k + 1) + (n + 1 - (k + 1))) := by rw[← h4]
-        _ = n ! * ((k + 1) + (n - k)) := by rw[Nat.add_sub_add_right]
-        _ = n ! * (1 + n) := by rw[h5]
-        _ = (n + 1) * n ! := by ring
-        _ = (n + 1)! := by rw[factorial']
-
-    · -- `k + 1 = n + 1`
-      have h2: n = k := by addarith[h1]
-      have h3 : n < k + 1 := by addarith[h2]
-      
-      rw[choose', choose_eq_zero_of_gt n (k + 1) h3, choose_same n k h2, Nat.add_zero, Nat.one_mul]
-
-      calc
-        (n + 1 - (k + 1))! * (k + 1)! = (n + 1 - (n + 1))! * (k + 1)! := by rw[h1]
-        _ = (k + 1)! := by rw[Nat.sub_self (n + 1), factorial', Nat.one_mul]
-        _ = (n + 1)! := by rw[h1]
+      rw[choose', Nat.mul_assoc, Nat.add_mul, ← Nat.mul_assoc, ← Nat.mul_assoc, IH1', IH2' ]
+      rw[← Nat.left_distrib, hk, factorial']
+      ring
 
 
+    · -- Case #2 `k + 1 = n + 1`
+      have h1 : k = n := by addarith[hb]
+      rw[choose_same (n + 1) (k + 1) hb.symm, Nat.add_sub_add_right, h1, Nat.sub_self, factorial']
+      ring
+
+/-- Helper theorem to prove the following theorem -/
 theorem factorial_gt_zero (n : ℕ) : 0 < n ! := by
   simple_induction n with k IH
   · -- Base Case `0 < 0!`
     rw[factorial']
     numbers
   · -- Inductive Case
-    calc
-      (k + 1)! = (k + 1) * k ! := by rw[factorial']
-      _ = k * k ! + k ! := by ring
-      _ ≥ k ! := by extra
-      _ > 0 := by rel[IH]
+    rw[factorial', Nat.add_mul]
+    extra
 
 /-- Required to prove that I can divide by `(n - k)! * k!` -/
 theorem factorial_pos_of_ge (n k : ℕ) (hn:  k ≤ n) : 0 < (n - k)! * k ! := by
@@ -134,7 +122,7 @@ theorem factorial_pos_of_ge (n k : ℕ) (hn:  k ≤ n) : 0 < (n - k)! * k ! := b
 theorem choose_expansion_factorial' (n k : ℕ) (hn : k ≤ n) :
   choose' n k =  (n !) / ((n - k)! * k !) := by
 
-  have h1 := choose_expansion_factorial n k hn
+  have h1 := choose_expansion_factorial hn
   have h2 : 0 < (n - k)! * k ! := factorial_pos_of_ge n k hn
   have h1': n ! = ((n - k)! * k !) * choose' n k := by
     calc
