@@ -267,27 +267,29 @@ example : Surjective (fun ((a, b) : ℚ × ℕ) ↦ a ^ b) := by
   dsimp
   ring
 
+
+
 example : ¬ Injective
     (fun ((x, y, z) : ℝ × ℝ × ℝ) ↦ (x + y + z, x + 2 * y + 3 * z)) := by
-  sorry
+  dsimp[Injective]
+  push_neg
+  use (1, 0, 0), (0, 2, -1)
+  constructor
+  · numbers
+  · numbers
 
 
 example : Injective (fun ((x, y) : ℝ × ℝ) ↦ (x + y, x + 2 * y, x + 3 * y)) := by
-  
-
-
-
-  dsimp[Injective]
-  intro (a1, a2) (b1, b2) hf
-  dsimp at hf
-  obtain ⟨a1', a2', hf⟩ := hf
-  constructor
-  · sorry
-  · sorry
+  sorry
 
 
 def h : ℝ × ℝ × ℝ → ℝ × ℝ × ℝ
   | (x, y, z) => (y, z, x)
 
 example : h ∘ h ∘ h = id := by
-  sorry
+  ext p
+  constructor
+  · rfl
+  · constructor
+    · rfl
+    · rfl

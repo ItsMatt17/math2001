@@ -166,7 +166,16 @@ example {f : X → Y} (hf : Injective f) {g : Y → Z} (hg : Injective g) :
 
 example {f : X → Y} (hf : Surjective f) {g : Y → Z} (hg : Surjective g) :
     Surjective (g ∘ f) := by
-  sorry
+  dsimp[Surjective]
+  intro z
+
+  obtain ⟨y, hy⟩ := hg z
+  obtain ⟨x, hx⟩ := hf y
+  use x
+  rw[hx, hy]
+
+
+
 
 example {f : X → Y} (hf : Surjective f) : ∃ g : Y → X, f ∘ g = id := by
   choose k hf using hf
